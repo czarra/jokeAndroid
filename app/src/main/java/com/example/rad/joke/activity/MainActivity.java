@@ -1,5 +1,6 @@
 package com.example.rad.joke.activity;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import android.view.MenuItem;
 
 import com.example.rad.joke.R;
 import com.example.rad.joke.data.Category;
+import com.example.rad.joke.data.Joke;
 import com.example.rad.joke.fragments.CategoryFragment;
 
 public class MainActivity extends AppCompatActivity implements CategoryFragment.OnFragmentInteractionListener{
@@ -51,8 +53,15 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
         transaction.commit();
     }
     @Override
-    public void onFragmentInteraction(Category game) {
+    public void onFragmentInteraction(Category category) {
+        starJokeActivity(category);
+    }
 
+    private void starJokeActivity(Category category) {
+        Intent mIntent = new Intent(MainActivity.this, JokeActivity.class);
+        mIntent.putExtra("code", category.getCode());
+        startActivity(mIntent);
+//        finish();
     }
 
 

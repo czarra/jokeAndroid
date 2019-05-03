@@ -40,7 +40,7 @@ public class MyCategoryRecyclerViewAdapter extends RecyclerView.Adapter<MyCatego
             @Override
             public void onClick(View v) {
                 if (null != listener) {
-                    Log.d("action Listener","click"+categories.get(position).geCode());
+                    Log.d("action Listener","click"+categories.get(position).getCode());
 
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.

@@ -12,7 +12,7 @@ public class Category {
 
     public Category(String name, String code) {
         this.name=this.upperCase(name);
-        this.code=this.remove(code);
+        this.code=this.remove(code).replaceAll("\\s+","");
     }
 
     public Category() {
@@ -23,7 +23,7 @@ public class Category {
         return name;
     }
 
-    public String geCode() {
+    public String getCode() {
         return code;
     }
 
