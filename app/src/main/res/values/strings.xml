@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Chuck Norris</string>
+
+    <string name="favorite">Favorite</string>
+    <string name="test">test</string>
+
 </resources>
