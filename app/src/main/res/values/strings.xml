@@ -4,4 +4,7 @@
     <string name="favorite">Favorite</string>
     <string name="test">test</string>
 
+    <string name="sendEmail">Send Email</string>
+    <string name="next">Next</string>
+
 </resources>

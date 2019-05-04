@@ -6,11 +6,14 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.rad.joke.R;
 import com.example.rad.joke.api.ApiClient;
@@ -31,6 +34,8 @@ public class JokeActivity extends AppCompatActivity {
     private TextView textJoke;
     private ProgressBar progressBar;
     private String code;
+    private String jokeText;
+    private Button sendEmail, next;
     private static final Logger LOG = LoggerFactory.getLogger(CategoryFragment.class);
 
     @Override
@@ -43,22 +48,51 @@ public class JokeActivity extends AppCompatActivity {
         code =  intent.getStringExtra("code");
         progressBar= (ProgressBar) findViewById(R.id.progressBar1);
         textJoke = (TextView) findViewById(R.id.textJoke);
+        sendEmail = (Button) findViewById(R.id.sendEmail);
+        next = (Button) findViewById(R.id.next);
 
+        setData();
 
+        sendEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //send email
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("message/rfc822");
+//                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"recipient@example.com"});
+                i.putExtra(Intent.EXTRA_SUBJECT, "App Joke");
+                i.putExtra(Intent.EXTRA_TEXT   , jokeText);
+                try {
+                    startActivity(Intent.createChooser(i, "Send mail..."));
+                } catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(JokeActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setData();
+            }
+        });
+    }
 
-
+    private void setData(){
         RetrieveJoke retrieveTask = new RetrieveJoke() {
             @Override
             protected void onPreExecute() {
                 textJoke.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
-
+                sendEmail.setVisibility(View.INVISIBLE);
+                next.setVisibility(View.INVISIBLE);
             }
-
             @Override
             protected void onPostExecute(Joke joke) {
-                textJoke.setText(joke.getValue());
+                jokeText = joke.getValue();
+                textJoke.setText(jokeText);
+                sendEmail.setVisibility(View.VISIBLE);
                 textJoke.setVisibility(View.VISIBLE);
+                next.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
             }
         };
@@ -98,7 +132,7 @@ public class JokeActivity extends AppCompatActivity {
             Joke joke = new Joke();
 
             try {
-                LOG.error(Constants.BASE_URL_RANDOM_CATEGORY+code);
+//                LOG.error(Constants.BASE_URL_RANDOM_CATEGORY+code);
                 String jsonResponse;
                 if(code.length()>0) {
                     jsonResponse = client.getURL(Constants.BASE_URL_RANDOM_CATEGORY + code, String.class);

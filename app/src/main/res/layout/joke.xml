@@ -18,15 +18,44 @@
         />
 
 
-
     <TextView
         android:id="@+id/textJoke"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_marginTop="70dp"
+        android:text="@string/test"
         android:textAlignment="center"
         android:textColor="@color/text"
         android:textSize="10pt" />
+
+    <Button
+        android:id="@+id/sendEmail"
+        android:layout_width="105dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textJoke"
+        android:layout_marginLeft="15pt"
+        android:layout_marginTop="9dp"
+        android:layout_marginRight="5pt"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/button"
+        android:text="@string/sendEmail"
+        android:textColor="@color/buttonText"
+        android:textSize="6pt" />
+
+    <Button
+        android:id="@+id/next"
+        android:layout_width="105dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textJoke"
+        android:layout_marginTop="11dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="15pt"
+        android:background="@drawable/button"
+        android:text="@string/next"
+        android:textColor="@color/buttonText"
+        android:layout_alignParentEnd="true"
+        android:textSize="6pt" />
 
 
 </RelativeLayout>
