@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
 
 
         if (id == R.id.favorite) {
-            //startEndGamesActivity();
-
+            startFavoriteActivity();
+            finish();
             return true;
         }
 
@@ -68,7 +68,12 @@ public class MainActivity extends AppCompatActivity implements CategoryFragment.
         Intent mIntent = new Intent(MainActivity.this, JokeActivity.class);
         mIntent.putExtra("code", category.getCode());
         startActivity(mIntent);
-//        finish();
+        finish();
+    }
+
+    private void startFavoriteActivity(){
+        Intent mIntent = new Intent(MainActivity.this, FavoriteActivity.class);
+        startActivity(mIntent);
     }
 
 

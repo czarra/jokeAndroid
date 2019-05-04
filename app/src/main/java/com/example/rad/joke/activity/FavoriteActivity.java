@@ -23,9 +23,9 @@ import com.example.rad.joke.R;
 import com.example.rad.joke.api.ApiClient;
 import com.example.rad.joke.api.ApiException;
 import com.example.rad.joke.constants.Constants;
-import com.example.rad.joke.data.Category;
 import com.example.rad.joke.data.Joke;
 import com.example.rad.joke.fragments.CategoryFragment;
+import com.example.rad.joke.fragments.FavoriteFragment;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -33,7 +33,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JokeActivity extends AppCompatActivity {
+public class FavoriteActivity extends AppCompatActivity implements FavoriteFragment.OnFragmentInteractionListener{
 
 
     private TextView textJoke;
@@ -50,100 +50,17 @@ public class JokeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.joke);
+        setContentView(R.layout.activity_favorite);
 
-
-        Intent intent = getIntent();
-        code =  intent.getStringExtra("code");
-        progressBar= (ProgressBar) findViewById(R.id.progressBar1);
-        textJoke = (TextView) findViewById(R.id.textJoke);
-        sendEmail = (Button) findViewById(R.id.sendEmail);
-        next = (Button) findViewById(R.id.next);
-        imageStar = (ImageView) findViewById(R.id.imageStar);
-        context = this;
-        setData();
-
-        sendEmail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //send email
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("message/rfc822");
-                i.putExtra(Intent.EXTRA_SUBJECT, "App Joke");
-                i.putExtra(Intent.EXTRA_TEXT   , jokeText);
-                try {
-                    startActivity(Intent.createChooser(i, "Send mail..."));
-                } catch (android.content.ActivityNotFoundException ex) {
-                    Toast.makeText(JokeActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setData();
-            }
-        });
-
-        imageStar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!globalJoke.getStar()){
-                    Picasso.with(v.getContext())
-                            .load(R.mipmap.star)
-                            .into(imageStar);
-                    globalJoke.setStar(true);
-                    addRemove(globalJoke);
-                } else {
-                    Picasso.with(v.getContext())
-                            .load(R.mipmap.empty_star)
-                            .into(imageStar);
-                    globalJoke.setStar(false);
-                    addRemove(globalJoke);
-                }
-            }
-        });
+        loadFragment(FavoriteFragment.newInstance());
     }
 
-    private void setData(){
-        RetrieveJoke retrieveTask = new RetrieveJoke() {
-            @Override
-            protected void onPreExecute() {
-                textJoke.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
-                sendEmail.setVisibility(View.INVISIBLE);
-                next.setVisibility(View.INVISIBLE);
-                imageStar.setVisibility(View.INVISIBLE);
 
-            }
-            @Override
-            protected void onPostExecute(Joke joke) {
-                globalJoke = joke;
-                jokeText = joke.getValue();
-                textJoke.setText(jokeText);
-                if(joke.getStar()){
-                    Picasso.with(context)
-                            .load(R.mipmap.star)
-                            .into(imageStar);
-                } else {
-                    Picasso.with(context)
-                            .load(R.mipmap.empty_star)
-                            .into(imageStar);
-                }
-                sendEmail.setVisibility(View.VISIBLE);
-                textJoke.setVisibility(View.VISIBLE);
-                next.setVisibility(View.VISIBLE);
-                imageStar.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-            }
-        };
-        retrieveTask.execute();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_joke, menu);
+        getMenuInflater().inflate(R.menu.menu_favorites, menu);
         return true;
     }
 
@@ -155,12 +72,6 @@ public class JokeActivity extends AppCompatActivity {
         int id = item.getItemId();
 
 
-        if (id == R.id.favorite) {
-            startFavoriteActivity();
-            finish();
-            return true;
-        }
-
         if (id == R.id.category) {
             startMainActivity();
             finish();
@@ -168,6 +79,17 @@ public class JokeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void loadFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.content_favorite, fragment);
+        transaction.commit();
+    }
+
+    private void startMainActivity(){
+        Intent mIntent = new Intent(FavoriteActivity.this, MainActivity.class);
+        startActivity(mIntent);
     }
 
     private void addRemove(Joke item) {
@@ -198,14 +120,9 @@ public class JokeActivity extends AppCompatActivity {
         }
     }
 
-    private void startMainActivity(){
-        Intent mIntent = new Intent(JokeActivity.this, MainActivity.class);
-        startActivity(mIntent);
-    }
-
-    private void startFavoriteActivity(){
-        Intent mIntent = new Intent(JokeActivity.this, FavoriteActivity.class);
-        startActivity(mIntent);
+    @Override
+    public void onFragmentInteraction(Joke joke){
+        addRemove(joke);
     }
 
     @Override
@@ -213,7 +130,6 @@ public class JokeActivity extends AppCompatActivity {
         startMainActivity();
         finish();
     }
-
 
 
     class RetrieveJoke extends AsyncTask<String, String, Joke> {

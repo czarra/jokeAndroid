@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">Chuck Norris</string>
 
-    <string name="favorite">Favorite</string>
+    <string name="favorite">Favorites</string>
+    <string name="category">Categories</string>
     <string name="test">test</string>
 
     <string name="sendEmail">Send Email</string>
     <string name="next">Next</string>
+    <string name="empty">List is empty</string>
+
 
 </resources>
