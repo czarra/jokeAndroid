@@ -1,6 +1,7 @@
 package com.example.rad.joke.activity;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -15,8 +16,14 @@ import com.example.rad.joke.fragments.CategoryFragment;
 
 public class MainActivity extends AppCompatActivity implements CategoryFragment.OnFragmentInteractionListener{
 
+    private SQLiteDatabase myDataBase;
+    private final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Jokes( ID integer primary key autoincrement,ID_JOKE VARCHAR,VALUE VARCHAR, TIME INT);";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        myDataBase = openOrCreateDatabase("Jokes", MODE_PRIVATE, null);
+        myDataBase.execSQL(CREATE_TABLE);
+        myDataBase.close();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

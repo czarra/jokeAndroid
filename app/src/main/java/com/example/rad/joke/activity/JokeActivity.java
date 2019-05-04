@@ -1,6 +1,9 @@
 package com.example.rad.joke.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +26,7 @@ import com.example.rad.joke.constants.Constants;
 import com.example.rad.joke.data.Category;
 import com.example.rad.joke.data.Joke;
 import com.example.rad.joke.fragments.CategoryFragment;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +41,10 @@ public class JokeActivity extends AppCompatActivity {
     private String code;
     private String jokeText;
     private Button sendEmail, next;
+    private ImageView imageStar;
+    private Joke globalJoke;
+    private SQLiteDatabase myDataBase;
+    private Context context;
     private static final Logger LOG = LoggerFactory.getLogger(CategoryFragment.class);
 
     @Override
@@ -50,7 +59,8 @@ public class JokeActivity extends AppCompatActivity {
         textJoke = (TextView) findViewById(R.id.textJoke);
         sendEmail = (Button) findViewById(R.id.sendEmail);
         next = (Button) findViewById(R.id.next);
-
+        imageStar = (ImageView) findViewById(R.id.imageStar);
+        context = this;
         setData();
 
         sendEmail.setOnClickListener(new View.OnClickListener() {
@@ -59,7 +69,6 @@ public class JokeActivity extends AppCompatActivity {
                 //send email
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setType("message/rfc822");
-//                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"recipient@example.com"});
                 i.putExtra(Intent.EXTRA_SUBJECT, "App Joke");
                 i.putExtra(Intent.EXTRA_TEXT   , jokeText);
                 try {
@@ -75,6 +84,25 @@ public class JokeActivity extends AppCompatActivity {
                 setData();
             }
         });
+
+        imageStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!globalJoke.getStar()){
+                    Picasso.with(v.getContext())
+                            .load(R.mipmap.star)
+                            .into(imageStar);
+                    globalJoke.setStar(true);
+                    addRemove(globalJoke);
+                } else {
+                    Picasso.with(v.getContext())
+                            .load(R.mipmap.empty_star)
+                            .into(imageStar);
+                    globalJoke.setStar(false);
+                    addRemove(globalJoke);
+                }
+            }
+        });
     }
 
     private void setData(){
@@ -85,14 +113,27 @@ public class JokeActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 sendEmail.setVisibility(View.INVISIBLE);
                 next.setVisibility(View.INVISIBLE);
+                imageStar.setVisibility(View.INVISIBLE);
+
             }
             @Override
             protected void onPostExecute(Joke joke) {
+                globalJoke = joke;
                 jokeText = joke.getValue();
                 textJoke.setText(jokeText);
+                if(joke.getStar()){
+                    Picasso.with(context)
+                            .load(R.mipmap.star)
+                            .into(imageStar);
+                } else {
+                    Picasso.with(context)
+                            .load(R.mipmap.empty_star)
+                            .into(imageStar);
+                }
                 sendEmail.setVisibility(View.VISIBLE);
                 textJoke.setVisibility(View.VISIBLE);
                 next.setVisibility(View.VISIBLE);
+                imageStar.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
             }
         };
@@ -123,6 +164,34 @@ public class JokeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void addRemove(Joke item) {
+
+        try {
+            myDataBase = openOrCreateDatabase("Jokes", MODE_PRIVATE, null);
+            String query = "SELECT * FROM Jokes WHERE ID_JOKE LIKE '"+item.getId()+"'";
+            Cursor cursor = myDataBase.rawQuery(query, null);
+            Log.e("in base",""+cursor.getCount());
+            String text;
+            if(cursor.getCount()>0){
+                myDataBase.execSQL("DELETE FROM Jokes WHERE ID_JOKE LIKE '"+item.getId()+"'");
+                text = "remove";
+
+            }else {
+                myDataBase.execSQL("INSERT INTO Jokes (ID_JOKE ,VALUE , TIME ) VALUES('" +
+                        item.getId() + "',\"" +
+                        item.getValue().replace('"',' ') + "\",'" +
+                        System.currentTimeMillis() + "');");
+                text = "add";
+            }
+            int duration = Toast.LENGTH_SHORT;
+//            Toast toast = Toast.makeText(this, text, duration);
+//            toast.show();
+            myDataBase.close();
+        }catch(Exception ex){
+            Log.e("select","Erro in geting id "+ex.toString());
+        }
+    }
+
 
     class RetrieveJoke extends AsyncTask<String, String, Joke> {
 
@@ -144,6 +213,12 @@ public class JokeActivity extends AppCompatActivity {
                 LOG.error(jsonObject.toString());
                 joke = Joke.fromJsonObject(jsonObject);
 
+                myDataBase = openOrCreateDatabase("Jokes", MODE_PRIVATE, null);
+                String query = "SELECT * FROM Jokes WHERE ID_JOKE LIKE '"+joke.getId()+"'";
+                Cursor cursor = myDataBase.rawQuery(query, null);
+                if(cursor.getCount()>0) {
+                    joke.setStar(true);
+                }
                 return joke;
             } catch (ApiException | JSONException exp) {
                 LOG.error(exp.getMessage(), exp);

@@ -10,6 +10,7 @@ public class Joke {
 
     private String id;
     private String value;
+    private boolean star = false;
 
     public Joke (String id, String value) {
         this.id=id;
@@ -37,6 +38,14 @@ public class Joke {
 
     public String getValue() {
         return value;
+    }
+
+    public void setStar(Boolean star){
+        this.star = star;
+    }
+
+    public Boolean getStar(){
+        return star;
     }
 
 }
