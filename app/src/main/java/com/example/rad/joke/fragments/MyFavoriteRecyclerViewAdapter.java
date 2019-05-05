@@ -42,9 +42,16 @@ public class MyFavoriteRecyclerViewAdapter extends RecyclerView.Adapter<MyFavori
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.joke = jokes.get(position);
         holder.textJoke.setText( jokes.get(position).getValue());
-        Picasso.with(context)
-                .load(R.mipmap.star)
-                .into(holder.imageStar);
+        if(jokes.get(position).getStar()){
+            Picasso.with(context)
+                    .load(R.mipmap.star)
+                    .into(holder.imageStar);
+        } else {
+            Picasso.with(context)
+                    .load(R.mipmap.empty_star)
+                    .into(holder.imageStar);
+        }
+
         holder.imageStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

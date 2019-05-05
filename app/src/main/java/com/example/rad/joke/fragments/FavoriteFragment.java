@@ -116,7 +116,7 @@ public class FavoriteFragment extends Fragment {
             List<Joke> list = new ArrayList<>();
             myDataBase = context.openOrCreateDatabase("Jokes", MODE_PRIVATE, null);
             String query = "SELECT * FROM Jokes ";
-            query +=" ORDER BY time ASC";
+            query +=" ORDER BY time DESC";
 
             Cursor cursor = myDataBase.rawQuery(query, null);
             Log.e("in base",""+cursor.getCount());
