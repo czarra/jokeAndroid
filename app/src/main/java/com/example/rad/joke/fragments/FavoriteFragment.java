@@ -12,7 +12,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.rad.joke.R;
@@ -38,6 +42,11 @@ public class FavoriteFragment extends Fragment {
     private SQLiteDatabase myDataBase;
     private Context context;
     private TextView empty;
+    private int selectedSpinner = 0;
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private RetrieveFavorite retrieveFavorite;
+    private Button buttonRun;
 
     public static FavoriteFragment newInstance() {
         FavoriteFragment fragment = new FavoriteFragment();
@@ -54,37 +63,64 @@ public class FavoriteFragment extends Fragment {
 
         // Set the adapter
         context = view.getContext();
-        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
-        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar1);
+        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar1);
         empty = (TextView) view.findViewById(R.id.empty);
+        buttonRun = (Button) view.findViewById(R.id.buttonRun) ;
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        adapter = new MyFavoriteRecyclerViewAdapter(new ArrayList<Joke>(), listener);
-        RetrieveFavorite retrieveGameTask = new RetrieveFavorite() {
+
+
+        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+
+        // Spinner click listener
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
-            protected void onPreExecute() {
-                recyclerView.setVisibility(View.GONE);
-                empty.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+//                Log.e("position", position+"  aa");
+                switch (position) {
+                    default:
+                        selectedSpinner = position;
+                }
             }
 
             @Override
-            protected void onPostExecute(List<Joke> jokes) {
-                adapter.jokes.clear();
-                for (int i = 0; i < jokes.size(); i++) {
-                    adapter.jokes.add(jokes.get(i));
-                }
-                if(jokes.size() == 0){
-                    empty.setVisibility(View.VISIBLE);
-                }
-                adapter.notifyDataSetChanged();
-                recyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
+            public void onNothingSelected(AdapterView<?> parent) {
+                // TODO Auto-generated method stub
+                selectedSpinner=1;
             }
-        };
-        retrieveGameTask.execute();
+        });
+        // Spinner Drop down elements
+        List<String> categories = new ArrayList<String>();
+
+        categories.add("Descending");// 0 -manlejąco
+        categories.add("Ascending");// 1 -rosnaco
+
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context,R.layout.simple_spinner_item, categories);
+
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+
+        adapter = new MyFavoriteRecyclerViewAdapter(new ArrayList<Joke>(), listener);
+        retrieveFavorite = forButtons();
+        retrieveFavorite.execute();
         recyclerView.setAdapter(adapter);
+
+        buttonRun.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                retrieveFavorite = forButtons();
+                retrieveFavorite.execute();
+                recyclerView.scrollToPosition(0);
+            }
+
+        });
+
         return view;
     }
 
@@ -109,6 +145,33 @@ public class FavoriteFragment extends Fragment {
         void onFragmentInteraction(Joke item);
     }
 
+    private RetrieveFavorite forButtons(){
+        RetrieveFavorite retrieveFavorite = new RetrieveFavorite() {
+            @Override
+            protected void onPreExecute() {
+                recyclerView.setVisibility(View.GONE);
+                empty.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected void onPostExecute(List<Joke> jokes) {
+                adapter.jokes.clear();
+                for (int i = 0; i < jokes.size(); i++) {
+                    adapter.jokes.add(jokes.get(i));
+                }
+                if(jokes.size() == 0){
+                    empty.setVisibility(View.VISIBLE);
+                }
+                adapter.notifyDataSetChanged();
+                recyclerView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+            }
+        };
+
+        return retrieveFavorite;
+    }
+
 
     class RetrieveFavorite extends AsyncTask<String, String, List<Joke>> {
 
@@ -116,7 +179,11 @@ public class FavoriteFragment extends Fragment {
             List<Joke> list = new ArrayList<>();
             myDataBase = context.openOrCreateDatabase("Jokes", MODE_PRIVATE, null);
             String query = "SELECT * FROM Jokes ";
-            query +=" ORDER BY time DESC";
+            if(selectedSpinner==0){
+                query +=" ORDER BY time DESC";
+            }else {
+                query +=" ORDER BY time ASC";
+            }
 
             Cursor cursor = myDataBase.rawQuery(query, null);
             Log.e("in base",""+cursor.getCount());

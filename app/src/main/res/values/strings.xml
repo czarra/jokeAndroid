@@ -8,6 +8,7 @@
     <string name="sendEmail">Send Email</string>
     <string name="next">Next</string>
     <string name="empty">List is empty</string>
-
+    <string name="find_run">Sort</string>
+    <string name="sort">Sort Date</string>
 
 </resources>
