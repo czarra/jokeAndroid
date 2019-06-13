@@ -55,7 +55,7 @@ public class CategoryFragment extends Fragment {
         layoutManager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new MyCategoryRecyclerViewAdapter(new ArrayList<Category>(), listener);
-        RetrieveGameTask retrieveGameTask = new RetrieveGameTask() {
+        RetrieveCategory retrieveCategory = new RetrieveCategory() {
             @Override
             protected void onPreExecute() {
                 recyclerView.setVisibility(View.GONE);
@@ -73,7 +73,7 @@ public class CategoryFragment extends Fragment {
                 progressBar.setVisibility(View.GONE);
             }
         };
-        retrieveGameTask.execute();
+        retrieveCategory.execute();
         recyclerView.setAdapter(adapter);
         return view;
     }
@@ -100,7 +100,7 @@ public class CategoryFragment extends Fragment {
     }
 
 
-    class RetrieveGameTask extends AsyncTask<String, String, List<Category>> {
+    class RetrieveCategory extends AsyncTask<String, String, List<Category>> {
 
         private final ApiClient client = ApiClient.getInstance();
 
